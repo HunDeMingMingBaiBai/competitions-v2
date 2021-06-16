@@ -21,27 +21,22 @@ from zipfile import ZipFile
 import requests
 import websockets
 import yaml
-from billiard.exceptions import SoftTimeLimitExceeded
-from celery import Celery, task
-from kombu import Queue, Exchange
 from urllib3 import Retry
+import datetime
+import pika
 
 
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
 logger = logging.getLogger()
-
-# Init celery + rabbit queue definitions
-app = Celery()
-app.config_from_object('celery_config')  # grabs celery_config.py
-app.conf.task_queues = [
-    # Mostly defining queue here so we can set x-max-priority
-    Queue('compute-worker', Exchange('compute-worker'), routing_key='compute-worker', queue_arguments={'x-max-priority': 10}),
-]
-
+logger.setLevel(logging.INFO)
+logger.addHandler(console)
 
 # Setup base directories used by all submissions
 HOST_DIRECTORY = os.environ.get("HOST_DIRECTORY", "/tmp/codabench/")  # note: we need to pass this directory to
                                                                       # docker compose so it knows where to store things!
 BASE_DIR = "/codabench/"
+DB_DIR = os.path.join(BASE_DIR, "workerDB")
 CACHE_DIR = os.path.join(BASE_DIR, "cache")
 MAX_CACHE_DIR_SIZE_GB = float(os.environ.get('MAX_CACHE_DIR_SIZE_GB', 10))
 
@@ -70,14 +65,23 @@ class SubmissionException(Exception):
     pass
 
 
+def on_message(channel, method_frame, header_frame, body):
+    logger.info(f"on_message body: {body}")
+    body = json.loads(body)
+    run_wrapper(body)
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+
 # -----------------------------------------------------------------------------
 # The main compute worker entrypoint, this is how a job is ran at the highest
 # level.
 # -----------------------------------------------------------------------------
-@task(name="compute_worker_run")
 def run_wrapper(run_args):
     logger.info(f"Received run arguments: {run_args}")
     run = Run(run_args)
+
+    if run.check_submission():
+        return
 
     try:
         run.prepare()
@@ -285,18 +289,34 @@ class Run:
             ]
         return [run_args[name] for name in DETAILED_OUTPUT_NAMES]
 
+    def _storage_in_local(self, data=''):
+        if not isinstance(data, str):
+            data = json.dumps(data)
+        if not os.path.exists(DB_DIR):
+            os.mkdir(DB_DIR)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+        file_name = f"submission_{self.submission_id}_{timestamp}"
+        with open(os.path.join(DB_DIR, file_name), 'w+') as f:
+            f.write(data)
+
     def _update_submission(self, data):
         url = f"{self.submissions_api_url}/submissions/{self.submission_id}/"
         data["secret"] = self.secret
 
         logger.info(f"Updating submission @ {url} with data = {data}")
 
-        resp = self.requests_session.patch(url, data, timeout=15)
-        if resp.status_code == 200:
-            logger.info("Submission updated successfully!")
-        else:
-            logger.info(f"Submission patch failed with status = {resp.status_code}, and response = \n{resp.content}")
-            raise SubmissionException("Failure updating submission data.")
+        for i in range(3):
+            resp = self.requests_session.patch(url, data, timeout=15)
+            if resp.status_code == 200 or resp.status_code == 201:
+                logger.info("Submission updated successfully!")
+                return
+            else:
+                logger.info(
+                    f"Submission updated error, retry {i} url={url} with data={data} , response.status={resp.status_code} response={resp.content}")
+
+        self._storage_in_local(data)
+        logger.info(f"Submission patch failed with status = {resp.status_code}, and response = \n{resp.content}")
+        raise SubmissionException("Failure updating submission data.")
 
     def _update_status(self, status, extra_information=None):
         if status not in AVAILABLE_STATUSES:
@@ -609,6 +629,22 @@ class Run:
         else:
             logger.info("Cache directory does not need to be pruned!")
 
+    def check_submission(self):
+        url = f"{self.submissions_api_url}/submissions/{self.submission_id}/worker_check_submission/"
+        for i in range(3):
+            resp = requests.get(url, timeout=3)
+            if resp.status_code == 200:
+                logger.info(f"check_submission url={url}, response status={resp.status_code} response content={resp.content}")
+                break
+            else:
+                logger.info(f"check_submission error retry={i} url={url}, response status={resp.status_code} response content={resp.content}")
+        data = resp.json()
+        is_cancel = False
+        if data.get('is_cancel'):
+            is_cancel = data.get('is_cancel')
+        logger.info(f"check_submission url={url} data={data}")
+        return is_cancel
+
     def prepare(self):
         if not self.is_scoring:
             # Only during prediction step do we want to announce "preparing"
@@ -782,3 +818,36 @@ class Run:
 
         logger.info(f"Destroying submission temp dir: {self.root_dir}")
         shutil.rmtree(self.root_dir)
+
+
+if __name__ == '__main__':
+    broker_url = os.environ.get('BROKER_URL')
+    parameters = pika.URLParameters(broker_url)
+    while(True):
+        try:
+            connection = pika.BlockingConnection(parameters=parameters)
+            if connection.is_open:
+                logger.info("connection success")
+                break
+            else:
+                logger.info("connection fail , will retry ")
+                time.sleep(10)
+        except Exception as e:
+            logger.info(f"connection fail Exception: {str(e)}, will retry ")
+            time.sleep(10)
+    channel = connection.channel()
+    channel.queue_declare(
+        queue="compute-worker",
+        durable=True,
+        exclusive=False,
+        auto_delete=False,
+        arguments={'x-max-priority': 10}
+    )
+    channel.basic_qos(prefetch_count=1)
+    channel.basic_consume(queue="compute-worker", on_message_callback=on_message)
+    try:
+        logger.info('start_consuming')
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        channel.stop_consuming()
+    connection.close()

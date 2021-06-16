@@ -43,6 +43,7 @@ THIRD_PARTY_APPS = (
     'channels',
     'drf_yasg',
     'redis',
+    'django_apscheduler',
 )
 OUR_APPS = (
     'chahub',
@@ -151,7 +152,7 @@ SOCIAL_AUTH_USER_MODEL = 'profiles.User'
 # =============================================================================
 # Debugging
 # =============================================================================
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", True)
 
 # =============================================================================
 # Database
@@ -198,30 +199,11 @@ FLOWER_HOST = os.environ.get('FLOWER_HOST', RABBITMQ_HOST)
 FLOWER_PUBLIC_PORT = os.environ.get('FLOWER_PUBLIC_PORT', '5555')
 
 # ============================================================================
-# Celery
+# django-apscheduler
 # ============================================================================
-CELERY_BROKER_USE_SSL = os.environ.get('BROKER_USE_SSL', False)
-CELERY_BROKER_URL = os.environ.get('BROKER_URL')
-if not CELERY_BROKER_URL:
-    CELERY_BROKER_URL = f'pyamqp://{RABBITMQ_DEFAULT_USER}:{RABBITMQ_DEFAULT_PASS}@{RABBITMQ_HOST}:{RABBITMQ_PORT}//'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ('json',)
-CELERY_BEAT_SCHEDULE = {
-    'do_phase_migrations': {
-        'task': 'competitions.tasks.do_phase_migrations',
-        'schedule': timedelta(seconds=300),
-    },
-    'update_phase_statuses': {
-        'task': 'competitions.tasks.update_phase_statuses',
-        'schedule': timedelta(seconds=3600)
-    },
-    'submission_status_cleanup': {
-        'task': 'competitions.tasks.submission_status_cleanup',
-        'schedule': timedelta(seconds=3600)
-    },
-}
-CELERY_TIMEZONE = 'UTC'
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
 
 # ============================================================================
 # Caching
@@ -278,6 +260,12 @@ CORS_ORIGIN_ALLOW_ALL = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
+                      '[%(levelname)s][%(message)s]'
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
@@ -285,10 +273,6 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-        },
-        'django': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
@@ -330,6 +314,7 @@ if not os.path.exists(TEMP_SUBMISSION_STORAGE):
 STORAGE_IS_S3 = STORAGE_TYPE == 's3' or STORAGE_TYPE == 'minio'
 STORAGE_IS_GCS = STORAGE_TYPE == 'gcs'
 STORAGE_IS_AZURE = STORAGE_TYPE == 'azure'
+STORAGE_IS_COS = STORAGE_TYPE == 'cos'
 
 if STORAGE_IS_S3:
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -337,6 +322,8 @@ elif STORAGE_IS_GCS:
     DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 elif STORAGE_IS_AZURE:
     DEFAULT_FILE_STORAGE = "utils.storage.CodalabAzureStorage"
+elif STORAGE_IS_COS:
+    DEFAULT_FILE_STORAGE = "utils.cos_storage.CosStorage"
 else:
     raise NotImplementedError("Must use STORAGE_TYPE of 's3', 'minio', 'gcs', or 'azure'")
 
@@ -390,35 +377,43 @@ GS_PUBLIC_BUCKET_NAME = os.environ.get('GS_PUBLIC_BUCKET_NAME')
 GS_PRIVATE_BUCKET_NAME = os.environ.get('GS_PRIVATE_BUCKET_NAME')
 GS_BUCKET_NAME = GS_PUBLIC_BUCKET_NAME  # Default bucket set to public bucket
 
+# Tencent COS
+COS_SECRET_ID = os.environ.get('COS_SECRET_ID')
+COS_SECRET_KEY = os.environ.get('COS_SECRET_KEY')
+COS_REGION = os.environ.get('COS_REGION')
+COS_BUCKET_PUBLIC = os.environ.get('COS_BUCKET_PUBLIC')
+COS_BUCKET_PRIVATE = os.environ.get('COS_BUCKET_PRIVATE')
+COS_TOKEN = os.environ.get('COS_TOKEN', None)
+
 # =============================================================================
 # Debug
 # =============================================================================
-if DEBUG:
-    INSTALLED_APPS += ('debug_toolbar',)
-    MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',
-                  'querycount.middleware.QueryCountMiddleware',
-                  ) + MIDDLEWARE  # we want Debug Middleware at the top
+#if DEBUG:
+#    INSTALLED_APPS += ('debug_toolbar',)
+#    MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',
+#                  'querycount.middleware.QueryCountMiddleware',
+#                  ) + MIDDLEWARE  # we want Debug Middleware at the top
     # tricks to have debug toolbar when developing with docker
 
-    INTERNAL_IPS = ['127.0.0.1']
+#    INTERNAL_IPS = ['127.0.0.1']
 
-    import socket
+#    import socket
 
-    try:
-        INTERNAL_IPS.append(socket.gethostbyname(socket.gethostname())[:-1])
-    except socket.gaierror:
-        pass
+#    try:
+#        INTERNAL_IPS.append(socket.gethostbyname(socket.gethostname())[:-1])
+#    except socket.gaierror:
+#        pass
 
-    QUERYCOUNT = {
-        'IGNORE_REQUEST_PATTERNS': [
-            r'^/admin/',
-            r'^/static/',
-        ]
-    }
+#    QUERYCOUNT = {
+#        'IGNORE_REQUEST_PATTERNS': [
+#            r'^/admin/',
+#            r'^/static/',
+#        ]
+#    }
 
-    DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": lambda request: True
-    }
+#    DEBUG_TOOLBAR_CONFIG = {
+#        "SHOW_TOOLBAR_CALLBACK": lambda request: True
+#    }
 
 # =========================================================================
 # Email
@@ -443,3 +438,24 @@ CHAHUB_PRODUCER_ID = os.environ.get('CHAHUB_PRODUCER_ID')
 # Django-Su (User impersonation)
 SU_LOGIN_CALLBACK = 'profiles.admin.su_login_callback'
 AJAX_LOOKUP_CHANNELS = {'django_su': dict(model='profiles.User', search_field='username')}
+
+
+# =============================================================================
+# Thread Pool
+# =============================================================================
+from concurrent.futures.thread import ThreadPoolExecutor
+CHAHUB_THREAD_POOL = ThreadPoolExecutor(max_workers=1, thread_name_prefix='CHAHUB_THREAD_POOL_')
+COMPETITION_THREAD_POOL = ThreadPoolExecutor(max_workers=1, thread_name_prefix='COMPETITION_THREAD_POOL_')
+SUBMISSION_THREAD_POOL = ThreadPoolExecutor(max_workers=2, thread_name_prefix='SUBMISSION_THREAD_POOL_')
+MAIL_THREAD_POOL = ThreadPoolExecutor(max_workers=1, thread_name_prefix='MAIL_THREAD_POOL_')
+MIGRATION_THREAD_POOL = ThreadPoolExecutor(max_workers=1, thread_name_prefix='MIGRATION_THREAD_POOL_')
+
+
+# =============================================================================
+# pika
+# =============================================================================
+import pika
+DEFAULT_CREDENTIALS = pika.PlainCredentials(
+                        username=RABBITMQ_DEFAULT_USER,
+                        password=RABBITMQ_DEFAULT_PASS
+                    )

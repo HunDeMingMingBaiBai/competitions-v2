@@ -7,7 +7,7 @@ from rest_framework.routers import SimpleRouter
 from rest_framework.permissions import AllowAny
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from .views import analytics, competitions, datasets, profiles, leaderboards, submissions, tasks, queues
+from .views import analytics, competitions, datasets, profiles, leaderboards, submissions, tasks, queues, forums
 
 
 router = SimpleRouter()
@@ -23,6 +23,7 @@ router.register('participants', competitions.CompetitionParticipantViewSet, 'par
 router.register('queues', queues.QueueViewSet, 'queues')
 router.register('users', profiles.UserViewSet, 'users')
 router.register('organizations', profiles.OrganizationViewSet, 'organizations')
+router.register('forums', forums.ForumViewSet, 'forums')
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -44,6 +45,15 @@ urlpatterns = [
 
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', obtain_auth_token),
+
+    path('get_token/', profiles.get_token, name="get_token"),
+    path('signup_site/', profiles.signup_site, name="signup_site"),
+    path('login_site/', profiles.login_site, name='login_site'),
+    path('logout_site/', profiles.logout_site, name='logout_site'),
+    path('get_general_status', profiles.get_general_status, name="get_general_status"),
+    path('forums/threads/<int:forum_pk>/<int:thread_pk>/', forums.forum_thread_detail),
+    path('forums/threads/<int:forum_pk>/<int:thread_pk>/create_post/', forums.create_post),
+    path('get_server_status/', profiles.get_server_status, name="get_server_status"),
 
     # API Docs
     re_path(r'docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

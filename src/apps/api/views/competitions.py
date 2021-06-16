@@ -1,3 +1,4 @@
+import logging
 import zipfile
 import json
 import csv
@@ -30,11 +31,13 @@ from api.serializers.leaderboards import LeaderboardPhaseSerializer, Leaderboard
 from competitions.emails import send_participation_requested_emails, send_participation_accepted_emails, \
     send_participation_denied_emails, send_direct_participant_email
 from competitions.models import Competition, Phase, CompetitionCreationTaskStatus, CompetitionParticipant, Submission
-from competitions.tasks import batch_send_email, manual_migration, create_competition_dump
+from competitions.tasks import async_batch_send_email, async_manual_migration, async_create_competition_dump
 from competitions.utils import get_popular_competitions, get_featured_competitions
 from leaderboards.models import Leaderboard
 from utils.data import make_url_sassy
 from api.permissions import IsOrganizerOrCollaborator
+
+logger = logging.getLogger(__name__)
 
 
 class CompetitionViewSet(ModelViewSet):
@@ -110,7 +113,7 @@ class CompetitionViewSet(ModelViewSet):
         return [permission() for permission in self.permission_classes]
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == 'list' or self.action == 'public':
             return CompetitionSerializerSimple
         elif self.action in ['get_phases', 'results', 'get_leaderboard_frontend_object']:
             return LeaderboardPhaseSerializer
@@ -128,6 +131,15 @@ class CompetitionViewSet(ModelViewSet):
         for phase in request.data['phases']:
             for index in range(len(phase['tasks'])):
                 phase['tasks'][index] = phase['tasks'][index]['task']
+
+        if 'leaderboards' in request.data:
+            leaderboard_data = request.data['leaderboards'][0]
+            leaderboard = LeaderboardSerializer(data=leaderboard_data)
+            leaderboard.is_valid()
+            leaderboard.save()
+            leaderboard_id = leaderboard["id"].value
+            for phase in request.data['phases']:
+                phase['leaderboard'] = leaderboard_id
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -242,7 +254,7 @@ class CompetitionViewSet(ModelViewSet):
             content = request.data['message']
         except KeyError:
             return Response({'detail': 'A message is required to send an email'}, status=status.HTTP_400_BAD_REQUEST)
-        batch_send_email.apply_async((comp.pk, content))
+        async_batch_send_email(comp.pk, content)
         return Response({}, status=status.HTTP_200_OK)
 
     def collect_leaderboard_data(self, competition, phase_pk=None):
@@ -358,7 +370,7 @@ class CompetitionViewSet(ModelViewSet):
         competition = self.get_object()
         if not competition.user_has_admin_permission(request.user):
             raise PermissionDenied("You don't have access")
-        create_competition_dump.delay(pk)
+        async_create_competition_dump(pk)
         serializer = CompetitionCreationTaskStatusSerializer({"status": "Success. Competition dump is being created."})
         return Response(serializer.data, status=201)
 
@@ -435,7 +447,7 @@ class PhaseViewSet(ModelViewSet):
                 {"detail": "You do not have administrative permissions for this competition"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        manual_migration.apply_async((pk,))
+        async_manual_migration(pk)
         return Response({}, status=status.HTTP_200_OK)
 
     @action(detail=True, url_name='rerun_submissions')

@@ -293,3 +293,14 @@ class PhaseResultsSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     tasks = PhaseResultsTaskSerializer(many=True, read_only=True)
     submissions = PhaseResultsSubmissionSerializer(many=True)
+
+
+class ServerStatusSerializer(serializers.Serializer):
+    competition = serializers.SerializerMethodField()
+    id = serializers.IntegerField()
+    owner = serializers.CharField(source='owner.username')
+    created_when = serializers.DateTimeField(format="%m-%d-%Y")
+    status = serializers.CharField()
+
+    def get_competition(self, instance):
+        return CompetitionSerializerSimple(instance.phase.competition, many=False).data

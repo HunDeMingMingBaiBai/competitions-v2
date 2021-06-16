@@ -4,7 +4,6 @@ import logging
 import requests
 from django.utils import timezone
 
-from celery_config import app
 from django.apps import apps
 from django.conf import settings
 from apps.chahub.utils import ChahubException
@@ -35,7 +34,11 @@ def get_obj(app_label, pk, include_deleted=False):
     return obj
 
 
-@app.task(queue='site-worker')
+def async_send_to_chahub(app_label, pk, data, data_hash):
+    logger.info("async_send_to_chahub")
+    settings.CHAHUB_THREAD_POOL.submit(send_to_chahub, app_label, pk, data, data_hash)
+
+
 def send_to_chahub(app_label, pk, data, data_hash):
     """
     Does a post request to the specified API endpoint on chahub with the inputted data.
@@ -65,7 +68,11 @@ def send_to_chahub(app_label, pk, data, data_hash):
     obj.save(send=False)
 
 
-@app.task(queue='site-worker')
+def async_delete_from_chahub(app_label, pk):
+    logger.info("async_delete_from_chahub")
+    settings.CHAHUB_THREAD_POOL.submit(delete_from_chahub, app_label, pk)
+
+
 def delete_from_chahub(app_label, pk):
     if not settings.CHAHUB_API_URL:
         raise ChahubException("CHAHUB_API_URL env var required to send to Chahub")
@@ -141,7 +148,6 @@ def get_chahub_models():
     return ChaHubSaveMixin.__subclasses__()
 
 
-@app.task(queue='site-worker')
 def do_chahub_retries(limit=None):
     if not chahub_is_up():
         return
@@ -157,7 +163,6 @@ def do_chahub_retries(limit=None):
             obj.delete()
 
 
-@app.task(queue='site-worker')
 def send_everything_to_chahub(limit=None):
     if not chahub_is_up():
         return

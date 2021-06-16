@@ -190,6 +190,14 @@ class SubmissionViewSet(ModelViewSet):
         canceled = submission.cancel()
         return Response({'canceled': canceled})
 
+    @action(detail=True, methods=('GET',))
+    def worker_check_submission(self, request, pk):
+        submission = Submission.objects.get(pk=pk)
+        is_cancel = False
+        if submission.status == Submission.CANCELLED:
+            is_cancel = True
+        return Response({'is_cancel': is_cancel})
+
     @action(detail=True, methods=('POST',))
     def re_run_submission(self, request, pk):
         submission = self.get_object()

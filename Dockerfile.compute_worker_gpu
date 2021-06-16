@@ -23,8 +23,4 @@ ADD docker/compute_worker/compute_worker_requirements.txt .
 RUN pip3 install -r compute_worker_requirements.txt
 ADD docker/compute_worker .
 
-CMD celery -A compute_worker worker \
-    -l info \
-    -Q compute-worker \
-    -n compute-worker@%n \
-    --concurrency=1
+CMD python compute_worker.py

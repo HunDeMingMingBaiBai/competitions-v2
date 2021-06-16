@@ -10,7 +10,6 @@ from tempfile import TemporaryDirectory, NamedTemporaryFile
 
 import oyaml as yaml
 import requests
-from celery._state import app_or_default
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
@@ -19,7 +18,6 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
-from celery_config import app
 from competitions.models import Submission, CompetitionCreationTaskStatus, SubmissionDetails, Competition, \
     CompetitionDump, Phase
 from competitions.unpackers.utils import CompetitionUnpackingException
@@ -30,8 +28,11 @@ from tasks.models import Task
 from datasets.models import Data
 from utils.data import make_url_sassy
 from utils.email import codalab_send_markdown_email
+import json
+import pika
+from uuid import uuid4
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 COMPETITION_FIELDS = [
     "title",
@@ -98,6 +99,62 @@ COLUMN_FIELDS = [
     'computation_indexes',
     'hidden',
 ]
+
+
+def build_new_connection(virtual_host):
+    logger.info("build_new_connection")
+    parameters = pika.ConnectionParameters(
+        host=settings.RABBITMQ_HOST,
+        port=settings.RABBITMQ_PORT,
+        virtual_host=virtual_host,
+        credentials=settings.DEFAULT_CREDENTIALS
+    )
+    connection = pika.BlockingConnection(parameters=parameters)
+    if connection.is_open:
+        return connection
+    else:
+        raise Exception("connection rabbitMQ fail")
+
+
+def app_send_task(run_args, time_limit, priority, connection):
+    logger.info("app_send_task")
+    task_id = str(uuid4())
+    run_args['task_id'] = task_id
+    # Open the channel
+    channel = connection.channel()
+    # Declare the queue
+    channel.queue_declare(
+        queue="compute-worker",
+        durable=True,
+        exclusive=False,
+        auto_delete=False,
+        arguments={'x-max-priority': 10}
+    )
+    # Turn on delivery confirmations
+    channel.confirm_delivery()
+    run_args['secret'] = str(run_args['secret'])
+    body = json.dumps(run_args, ensure_ascii=False)
+    logger.info(f"app_send_task body {body}")
+    for i in range(3):
+        # Send a message
+        try:
+            logger.info(f'Message publish was confirmed, before {i}')
+
+            channel.basic_publish(exchange='',
+                                  routing_key='compute-worker',
+                                  body=body,
+                                  properties=pika.BasicProperties(content_type='application/json',
+                                                                  delivery_mode=2,
+                                                                  priority=priority),
+                                  mandatory=True
+                                  )
+
+            logger.info(f'Message publish was confirmed, app_send_task success task_id={task_id}')
+            return task_id
+        except pika.exceptions.UnroutableError:
+            logger.error(f'Message could not be confirmed, app_send_task error task_id={task_id} retry {i}')
+    channel.close()
+    raise Exception(f'Message could not be confirmed, app_send_task error task_id={task_id}')
 
 
 def _send_to_compute_worker(submission, is_scoring):
@@ -188,28 +245,15 @@ def _send_to_compute_worker(submission, is_scoring):
         submission.queue_name = submission.phase.competition.queue.name or ''
         submission.save()
 
-        # Send to special queue? Using `celery_app` var name here since we'd be overriding the imported `app`
-        # variable above
-        celery_app = app_or_default()
-        with celery_app.connection() as new_connection:
-            new_connection.virtual_host = str(submission.phase.competition.queue.vhost)
-            task = celery_app.send_task(
-                'compute_worker_run',
-                args=(run_args,),
-                queue='compute-worker',
-                soft_time_limit=time_limit,
-                connection=new_connection,
-                priority=priority,
-            )
+        new_connection = build_new_connection(str(submission.phase.competition.queue.vhost))
+        task_id = app_send_task(run_args, time_limit, priority, new_connection)
+        new_connection.close()
+
     else:
-        task = app.send_task(
-            'compute_worker_run',
-            args=(run_args,),
-            queue='compute-worker',
-            soft_time_limit=time_limit,
-            priority=priority,
-        )
-    submission.celery_task_id = task.id
+        new_connection = build_new_connection('/')
+        task_id = app_send_task(run_args, time_limit, priority, new_connection)
+        new_connection.close()
+    submission.celery_task_id = task_id
 
     if submission.status == Submission.SUBMITTING:
         # Don't want to mark an already-prepared submission as "submitted" again, so
@@ -228,7 +272,7 @@ def create_detailed_output_file(detail_name, submission):
 
 def run_submission(submission_pk, tasks=None, is_scoring=False):
     task_ids = [t.id for t in tasks] if tasks else None
-    return _run_submission.apply_async((submission_pk, task_ids, is_scoring))
+    settings.SUBMISSION_THREAD_POOL.submit(_run_submission, submission_pk, task_ids, is_scoring)
 
 
 def send_submission_message(submission, data):
@@ -258,7 +302,6 @@ def send_child_id(submission, child_id):
     })
 
 
-@app.task(queue='site-worker', soft_time_limit=60)
 def _run_submission(submission_pk, task_pks=None, is_scoring=False):
     """This function is wrapped so that when we run tests we can run this function not
     via celery"""
@@ -315,7 +358,11 @@ def _run_submission(submission_pk, task_pks=None, is_scoring=False):
         _send_to_compute_worker(submission, is_scoring)
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 60)  # 1 hour timeout
+def async_unpack_competition(status_pk):
+    logger.info(f"async_unpack_competition pk = {status_pk}")
+    settings.COMPETITION_THREAD_POOL.submit(unpack_competition, status_pk)
+
+
 def unpack_competition(status_pk):
     logger.info(f"Starting unpack with status pk = {status_pk}")
     status = CompetitionCreationTaskStatus.objects.get(pk=status_pk)
@@ -422,7 +469,11 @@ def unpack_competition(status_pk):
         mark_status_as_failed_and_delete_dataset(status, message)
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 10)
+def async_create_competition_dump(competition_pk, keys_instead_of_files=True):
+    logger.info('async_create_competition_dump')
+    settings.COMPETITION_THREAD_POOL.submit(create_competition_dump, competition_pk, keys_instead_of_files)
+
+
 def create_competition_dump(competition_pk, keys_instead_of_files=True):
     yaml_data = {"version": "2"}
     try:
@@ -645,7 +696,6 @@ def create_competition_dump(competition_pk, keys_instead_of_files=True):
         logger.info("Could not find competition with pk {} to create a competition dump".format(competition_pk))
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 5)
 def do_phase_migrations():
     # Update phase statuses
     previous_subquery = Phase.objects.filter(
@@ -708,7 +758,11 @@ def do_phase_migrations():
         p.check_future_phase_submissions()
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 5)
+def async_manual_migration(phase_id):
+    logger.info(f'async_manual_migration phase_id:{phase_id}')
+    settings.MIGRATION_THREAD_POOL.submit(manual_migration, phase_id)
+
+
 def manual_migration(phase_id):
     try:
         source_phase = Phase.objects.get(id=phase_id)
@@ -724,7 +778,11 @@ def manual_migration(phase_id):
     destination_phase.competition.apply_phase_migration(source_phase, destination_phase, force_migration=True)
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 5)
+def async_batch_send_email(comp_id, content):
+    logger.info(f'async_batch_send_email comp_id:{comp_id}')
+    settings.MAIL_THREAD_POOL.submit(batch_send_email, comp_id, content)
+
+
 def batch_send_email(comp_id, content):
     try:
         competition = Competition.objects.prefetch_related('participants__user').get(id=comp_id)
@@ -739,14 +797,12 @@ def batch_send_email(comp_id, content):
     )
 
 
-@app.task(queue='site-worker', soft_time_limit=60 * 5)
 def update_phase_statuses():
     competitions = Competition.objects.exclude(phases__in=Phase.objects.filter(is_final_phase=True, end__lt=now()))
     for comp in competitions:
         comp.update_phase_statuses()
 
 
-@app.task(queue='site-worker')
 def submission_status_cleanup():
     submissions = Submission.objects.filter(status=Submission.RUNNING, has_children=False).select_related('phase', 'parent')
 

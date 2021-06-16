@@ -8,7 +8,7 @@ channels==2.4
 channels_redis==3.2.0
 django-extra-fields==0.9
 pillow==8.0.1
-celery==4.2.1
+#celery==4.2.1
 gunicorn==20.0.4
 urllib3<1.25,>=1.21.1
 uvicorn[standard]==0.13.3
@@ -67,3 +67,11 @@ flex==6.12.0
 
 pyrabbit2==1.0.7
 django-enforce-host==1.0.1
+
+# COS added
+cos-python-sdk-v5==1.7.6 #Package qcloud_cos is imported by cos_storage
+
+# pika
+pika==1.2.0
+# django-apscheduler apscheduler-3.7.0 django-apscheduler-0.5.2 tzlocal-2.1
+django-apscheduler==0.5.2

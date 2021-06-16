@@ -85,13 +85,19 @@ def make_url_sassy(path, permission='r', duration=60 * 60 * 24, content_type='ap
     elif settings.STORAGE_IS_AZURE:
         if permission == 'r':
             client_method = BlobPermissions.READ
+            if path.startswith("http"):
+                start = 0
+                for i in range(4):
+                    tmp = path.index("/", start)
+                    start = tmp + 1
+                path = path[start:]
         elif permission == 'w':
             client_method = BlobPermissions.WRITE
 
         sas_token = BundleStorage.service.generate_blob_shared_access_signature(
             BundleStorage.azure_container,
             path,
-            client_method,
+            permission=client_method,
             expiry=now() + timedelta(seconds=duration),
         )
 
@@ -100,6 +106,15 @@ def make_url_sassy(path, permission='r', duration=60 * 60 * 24, content_type='ap
             blob_name=path,
             sas_token=sas_token,
         )
+    elif settings.STORAGE_IS_COS:
+        if permission == "r":
+            if path.startswith("http"):
+                path = path.split("com/")[-1]
+        return BundleStorage.make_cos_url(
+            name=path,
+            permission=permission,
+            duration=duration)
+
 
 
 def put_blob(url, file_path):

@@ -19,6 +19,6 @@ class LargePagination(PageNumberPagination):
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
             'count': self.page.paginator.count,
-            'page_size': self.page_size,
+            'page_size': self.request.query_params.get(self.page_size_query_param) if self.request.query_params.get(self.page_size_query_param) else self.page_size,
             'results': data
         })

@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.db import models
 
-from chahub.tasks import send_to_chahub, delete_from_chahub
+from chahub.tasks import async_send_to_chahub, async_delete_from_chahub
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class ChaHubSaveMixin(models.Model):
                 data_hash = hashlib.md5(json.dumps(data).encode('utf-8')).hexdigest()
                 # Send to chahub if we haven't yet, we have new data
                 if not self.chahub_timestamp or self.chahub_data_hash != data_hash:
-                    send_to_chahub.apply_async((self.app_label, self.pk, data, data_hash))
+                    async_send_to_chahub(self.app_label, self.pk, data, data_hash)
             elif self.chahub_needs_retry:
                 # This is NOT valid but also marked as need retry, unmark need retry until this is valid again
                 logger.info('ChaHub :: This is invalid but marked for retry. Clearing retry until valid again.')
@@ -138,6 +138,6 @@ class ChaHubSaveMixin(models.Model):
         if settings.CHAHUB_API_URL and send:
             self.deleted = True
             self.save(send=False)
-            delete_from_chahub.apply_async((self.app_label, self.pk))
+            async_delete_from_chahub(self.app_label, self.pk)
         else:
             super().delete(*args, **kwargs)

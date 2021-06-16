@@ -3,7 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
@@ -13,17 +13,24 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.urls import reverse
+from rest_framework.decorators import api_view
+from datetime import timedelta
+from django.utils.timezone import now
 
 from api.permissions import IsUserAdminOrIsSelf, IsOrganizationEditor
 from api.serializers.profiles import MyProfileSerializer, UserSerializer, \
-    OrganizationSerializer, MembershipSerializer, SimpleOrganizationSerializer, DeleteMembershipSerializer
+    OrganizationSerializer, MembershipSerializer, SimpleOrganizationSerializer, DeleteMembershipSerializer, OrganizationDetailSerializer
 from profiles.helpers import send_mail
 from profiles.models import Organization, Membership
+from competitions.models import Submission
+from api.serializers.competitions import ServerStatusSerializer
+
+from django.contrib.auth import authenticate, login, logout
 
 User = get_user_model()
 
 
-class UserViewSet(mixins.UpdateModelMixin,
+class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                   GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -41,7 +48,7 @@ class UserViewSet(mixins.UpdateModelMixin,
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         resp = self.get_serializer(instance)
-        return Response(reverse('profiles:user_profile', args=[resp.data['username']]))
+        return Response(data=resp.data)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def participant_organizations(self, request):
@@ -86,6 +93,7 @@ def user_lookup(request):
 
 class OrganizationViewSet(mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
+                          mixins.RetrieveModelMixin,
                           GenericViewSet):
 
     def get_queryset(self):
@@ -122,6 +130,19 @@ class OrganizationViewSet(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         return serializer.save()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = OrganizationDetailSerializer(instance)
+        data = {
+            "organization": serializer.data
+        }
+        membership = instance.membership_set.filter(user=self.request.user)
+        if len(membership) == 1:
+            data['is_editor'] = membership.first().group in Membership.EDITORS_GROUP
+        else:
+            data['is_editor'] = False
+        return Response(data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsOrganizationEditor])
     def update_member_group(self, request, pk=None):
@@ -229,3 +250,88 @@ class OrganizationViewSet(mixins.CreateModelMixin,
 
         mem_ser = MembershipSerializer(membership)
         return Response(mem_ser.data, status=status.HTTP_200_OK)
+
+
+def get_token(request):
+    from django.middleware.csrf import get_token
+    token = get_token(request)
+    return JsonResponse(data={'token': token})
+
+
+def signup_site(request):
+    from profiles.forms import SignUpForm
+    form = SignUpForm(json.loads(request.body))
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        raw_password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=raw_password)
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        serializer = UserSerializer(user)
+        return JsonResponse(data={"code": "success", "user": serializer.data})
+    else:
+        data = {
+            "code": "fail",
+            "fail_message": form.error_messages
+        }
+        return JsonResponse(data=data)
+
+
+def login_site(request):
+    data = json.loads(request.body)
+    username = data.get("username")
+    password = data.get("password")
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        serializer = UserSerializer(user)
+        return JsonResponse(data={"code": "success", "user": serializer.data})
+    else:
+        return JsonResponse(data={"code": "fail"})
+
+
+def logout_site(request):
+    logout(request)
+    return JsonResponse(data={"code": "success"})
+
+
+def get_general_status(request):
+    from django.db.models import Count, Q
+    from competitions.models import Competition, Submission, CompetitionParticipant
+
+    data = Competition.objects.aggregate(
+        count=Count('*'),
+        published_comps=Count('pk', filter=Q(published=True)),
+        unpublished_comps=Count('pk', filter=Q(published=False)),
+    )
+
+    total_competitions = data['count']
+    public_competitions = data['published_comps']
+    private_competitions = data['unpublished_comps']
+    users = User.objects.all().count()
+    competition_participants = CompetitionParticipant.objects.all().count()
+    submissions = Submission.objects.all().count()
+
+    general_stats = [
+        {'label': "Total Competitions", 'count': total_competitions},
+        {'label': "Public Competitions", 'count': public_competitions},
+        {'label': "Private Competitions", 'count': private_competitions},
+        {'label': "Users", 'count': users},
+        {'label': "Competition Participants", 'count': competition_participants},
+        {'label': "Submissions", 'count': submissions},
+    ]
+    return JsonResponse(data={'general_stats': general_stats})
+
+
+@api_view(['GET'])
+def get_server_status(request):
+    if not request.user.is_staff:
+        raise Response(status=404)
+
+    qs = Submission.objects.all()
+    qs = qs.filter(created_when__gte=now() - timedelta(days=2))
+    qs = qs.order_by('-created_when')
+    qs = qs.select_related('phase__competition', 'owner')
+
+    serializer = ServerStatusSerializer(qs[:250], many=True)
+    return Response(serializer.data)

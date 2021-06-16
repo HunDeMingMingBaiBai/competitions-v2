@@ -135,6 +135,7 @@ class TaskListSerializer(serializers.ModelSerializer):
             'value',
             'competitions',
             'shared_with',
+            'is_public',
         )
 
     def get_competitions(self, instance):

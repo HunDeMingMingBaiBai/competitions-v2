@@ -104,6 +104,14 @@ class DataViewSet(ModelViewSet):
             if sub.phase:
                 return 'Cannot delete submission: submission belongs to an existing competition'
 
+    @action(detail=True, methods=('GET',))
+    def download(self, request, pk):
+        dataset = self.get_object()
+        body = {
+            "url": make_url_sassy(dataset.data_file.name)
+        }
+        return Response(body)
+
 
 class DataGroupViewSet(ModelViewSet):
     queryset = DataGroup.objects.all()
@@ -127,14 +135,14 @@ def upload_completed(request, key):
 
     if dataset.type == Data.COMPETITION_BUNDLE:
         # Doing a local import here to avoid circular imports
-        from competitions.tasks import unpack_competition
+        from competitions.tasks import async_unpack_competition
 
         status = CompetitionCreationTaskStatus.objects.create(
             created_by=request.user,
             dataset=dataset,
             status=CompetitionCreationTaskStatus.STARTING,
         )
-        unpack_competition.apply_async((status.pk,))
+        async_unpack_competition(status.pk)
         return Response({"status_id": status.pk})
 
     return Response({"key": dataset.key})

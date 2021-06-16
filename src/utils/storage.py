@@ -25,6 +25,9 @@ elif settings.STORAGE_IS_GCS:
 elif settings.STORAGE_IS_AZURE:
     BundleStorage = StorageClass(azure_container=settings.BUNDLE_AZURE_CONTAINER)
     PublicStorage = StorageClass(azure_container=settings.AZURE_CONTAINER)
+elif settings.STORAGE_IS_COS:
+    BundleStorage = StorageClass(cos_bucket=settings.COS_BUCKET_PRIVATE)
+    PublicStorage = StorageClass(cos_bucket=settings.COS_BUCKET_PUBLIC)
 else:
     raise NotImplementedError()
 
