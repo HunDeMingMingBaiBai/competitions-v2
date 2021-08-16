@@ -1,4 +1,4 @@
-label-on-image-demo
+competition-frontend-demo
 =====================
 
 ### Run the example
@@ -6,23 +6,22 @@ label-on-image-demo
 ```
 npm install
 npm start
-open http://localhost:5000
+open http://localhost:5002
 ```
 
 
 ### 线上环境
 
 正式环境：
-前端：http://m7-model-gpu08:8509/
-后端：http://m7-model-gpu21:8082/
+前端：
+后端：
 
 DEV环境：
-前端：http://m7-model-gpu08:8609/
-后端：http://m7-model-gpu21:8080/
+前端：
+后端：http://20.62.192.225:8000/
 
 
 ### 接口文档
-https://gitlab.4pd.io/cvxy4pd/siege/lumos/issues/32
+
 
 ### 原型设计
-https://modao.cc/app/design/pbkkeul5haeme65v?open_access_menu
