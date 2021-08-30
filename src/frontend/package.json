@@ -21,16 +21,23 @@
     "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
     "babel-loader": "^8.0.5",
     "connect": "^3.7.0",
     "connect-api-mocker": "^1.9.0",
     "copy-webpack-plugin": "6.2.1",
     "css-loader": "^3.6.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.1",
     "html-webpack-plugin": "^4.5.0",
     "jest": "^24.5.0",
     "less": "2.7.3",
     "less-loader": "4.1.0",
     "mini-css-extract-plugin": "^0.9.0",
+    "prettier": "^2.3.2",
+    "semantic-ui-less": "^2.4.1",
     "style-loader": "^1.2.1",
     "webpack": "^4.28.4",
     "webpack-cli": "^3.3.12",
@@ -46,12 +53,27 @@
     "babel-polyfill": "^6.26.0",
     "file-loader": "^6.1.0",
     "history": "^4.10.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
+    "semantic-ui-react": "^2.0.3",
     "url-loader": "^4.1.0",
     "ws": "^6.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   }
 }
