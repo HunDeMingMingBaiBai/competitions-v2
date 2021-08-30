@@ -1,17 +1,17 @@
 /**
- * @file lumos routes
+ * @description codabench routes
  * @author liguanlin<liguanlin@4paradigm.com>
  */
 import React from 'react';
 import { Route, Switch } from 'react-router';
-import Page from '../page'
+import Home from '@/home';
 
 const Routes = () => (
   <Switch>
     <Route
       exact
       path='/'
-      component={Page}
+      component={ Home }
     />
   </Switch>
 );

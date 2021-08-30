@@ -1,5 +1,5 @@
 /**
- * @file entry
+ * @description entry
  * @author liguanlin<liguanlin@4paradigm.com>
  */
 import React from 'react';
@@ -9,7 +9,7 @@ import App from './app';
 // import store from './app/store';
 
 render(
-    <App />
+  <App />
   ,
   document.getElementById('root'),
 );
