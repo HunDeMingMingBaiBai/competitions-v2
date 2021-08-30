@@ -7,6 +7,8 @@ import { HashRouter } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import Routes from './routes';
 
+import './index.less';
+
 
 const history = createBrowserHistory();
 
