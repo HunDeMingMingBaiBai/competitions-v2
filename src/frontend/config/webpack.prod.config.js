@@ -6,7 +6,9 @@
 
 const webpack = require('webpack');
 const path = require('path');
-const { merge } = require('webpack-merge');
+const {
+    merge
+} = require('webpack-merge');
 const base = require('./webpack.base.config.js');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
