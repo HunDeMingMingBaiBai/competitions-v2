@@ -1,3 +1,7 @@
+/**
+ * @description webpack dev config
+ * @author liguanlin<liguanlin@4paradigm.com>
+ */
 const webpack = require('webpack')
 const { merge } = require('webpack-merge');
 const base = require('./webpack.base.config.js');
@@ -13,10 +17,10 @@ module.exports = merge(base, {
   plugins: [
     // eslint-loader try to access this.options which was removed in webpack 4
     // as workaround use LoaderOptionsPlugin
-    new webpack.LoaderOptionsPlugin({options: {}}),
+    new webpack.LoaderOptionsPlugin({ options: {} }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin()
-],
+  ],
   devServer: {
     // publicPath: config.output.publicPath,
     historyApiFallback: true,
@@ -24,14 +28,14 @@ module.exports = merge(base, {
     port: 5002,
     contentBase: './src',
     proxy: [{
-        target: 'http://m7-model-gpu21:8082/',
-        context: ['/labelstudio']
+      target: 'http://m7-model-gpu21:8082/',
+      context: ['/labelstudio']
     }, {
       target: 'http://m7-model-gpu22:8302/',
       context: ['/predict']
     }],
-    // before: function(app) {
-    //   app.use('/labelstudio', apiMocker('./mocks/labelstudio'));
-    // },
+    before: function (app) {
+      app.use('/api', apiMocker('./mocks/api'));
+    },
   }
 });

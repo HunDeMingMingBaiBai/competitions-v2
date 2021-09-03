@@ -1,0 +1,29 @@
+{
+  "status": "success",
+  "data": [
+      {
+          "label": "Total Competitions",
+          "count": 7
+      },
+      {
+          "label": "Public Competitions",
+          "count": 2
+      },
+      {
+          "label": "Private Competitions",
+          "count": 5
+      },
+      {
+          "label": "Users",
+          "count": 4
+      },
+      {
+          "label": "Competition Participants",
+          "count": 19
+      },
+      {
+          "label": "Submissions",
+          "count": 64
+      }
+    ]
+}

@@ -1,0 +1,152 @@
+[
+  {
+    "id": 9,
+    "title": "Competition 8",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2018-12-25T02:30:56Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506578/be868d358495/example.jpg",
+    "description": "Center several entire name per director push turn. Her sister tell part themselves himself identify. Learn bill former owner research finish identify.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 7,
+    "title": "Competition 6",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2019-03-09T19:40:44Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/d16e946da26b/example.jpg",
+    "description": "Writer note PM blue whom something authority. Recent these nothing offer information save store. Week project leave.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 6,
+    "title": "Competition 5",
+    "created_by": "samantha71-1",
+    "created_when": "2019-05-30T00:29:00Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/5bcea28534df/example.jpg",
+    "description": "Hundred work maybe maybe. Little star indicate nearly design keep like unit.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 4,
+    "title": "Competition 3",
+    "created_by": "samantha71-1",
+    "created_when": "2020-04-29T00:04:06Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506576/8fc866315204/example.jpg",
+    "description": "Attorney question speak sound building player use small. Hair say choice policy. Carry improve society yard scene.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 5,
+    "title": "Competition 4",
+    "created_by": "samantha71-1",
+    "created_when": "2021-03-12T19:16:17Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506576/8b12b731ec0d/example.jpg",
+    "description": "Answer situation whole nor color else special. Every why experience animal.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 8,
+    "title": "Competition 7",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2021-03-18T09:46:59Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/03ecaeeed707/example.jpg",
+    "description": "Despite public air house guy back.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 12,
+    "title": "Classify Wheat Seeds",
+    "created_by": "admin",
+    "created_when": "2021-04-27T07:49:22.507727Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619509762/154a118c7b49/wheat.jpg",
+    "description": "Classification of wheat seeds into three classes based on seven dimensions of data",
+    "competition_type": "competition"
+  },
+  {
+    "id": 13,
+    "title": "Classify Wheat Seeds",
+    "created_by": "weihaodong",
+    "created_when": "2021-04-28T03:05:34.163210Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-28-1619579134/f92d38139702/wheat.jpg",
+    "description": "Classification of wheat seeds into three classes based on seven dimensions of data",
+    "competition_type": "competition"
+  },
+  {
+    "id": 22,
+    "title": "KDD Cup 2020 AutoGraph Challenge_single",
+    "created_by": "weihaodong",
+    "created_when": "2021-08-10T07:18:46.741644Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-10-1628579926/ce51e7fc9686/logo.png",
+    "description": "Automatic Graph Representation Learning Challenge",
+    "competition_type": "competition"
+  },
+  {
+    "id": 23,
+    "title": "KDD Cup 2020 AutoGraph Challenge",
+    "created_by": "weihaodong",
+    "created_when": "2021-08-10T07:33:14.887739Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-10-1628580794/f3f8a2cecfb2/logo.png",
+    "description": "Automatic Graph Representation Learning Challenge",
+    "competition_type": "benchmark"
+  },
+  {
+    "id": 29,
+    "title": "KDD Cup 2020 AutoGraph Challenge",
+    "created_by": "xuzhen",
+    "created_when": "2021-08-24T12:22:40.585347Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-24-1629807760/c6f1a77db94f/logo.png",
+    "description": "Automatic Graph Representation Learning Challenge",
+    "competition_type": "competition"
+  },
+  {
+    "id": 30,
+    "title": "AutoGraph Benchmark",
+    "created_by": "xuzhen",
+    "created_when": "2021-08-24T12:56:25.131718Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-24-1629809785/f44425869232/logo.png",
+    "description": "Benchmark for Automated Node Classification",
+    "competition_type": "competition"
+  },
+  {
+    "id": 31,
+    "title": "AutoGraph Benchmark",
+    "created_by": "xuzhen",
+    "created_when": "2021-08-24T13:04:53.911577Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-24-1629810293/31863cc5ccbe/logo.png",
+    "description": "Benchmark for Automated Node Classification",
+    "competition_type": "competition"
+  },
+  {
+    "id": 32,
+    "title": "AutoGraph Benchmark",
+    "created_by": "xuzhen",
+    "created_when": "2021-08-25T08:56:52.242137Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-25-1629881812/2f0e81ed0fda/logo.png",
+    "description": "Benchmark for Automated Node Classification",
+    "competition_type": "competition"
+  },
+  {
+    "id": 33,
+    "title": "Test AutoGraph Benchmark",
+    "created_by": "weihaodong",
+    "created_when": "2021-08-30T03:01:23.008697Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-08-30-1630292483/27715e8bc2d6/logo.png",
+    "description": "Benchmark for Automated Node Classification",
+    "competition_type": "competition"
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "status": "success",
+  "data": {
+    "popular_comps": [
+      {
+          "id": 6,
+          "title": "Competition 5",
+          "created_by": "marcus92-1",
+          "created_when": "2019-06-21T12:24:58Z",
+          "published": true,
+          "participant_count": 3,
+          "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-27-1622088307/dd081ed90f5e/example.jpg",
+          "description": "Measure middle size suddenly risk force join. Investment expert heavy sure affect. Middle boy guess while.",
+          "competition_type": "competition"
+      },
+      {
+          "id": 13,
+          "title": "Classify Wheat Seeds",
+          "created_by": "admin",
+          "created_when": "2021-05-28T06:13:30.525547Z",
+          "published": true,
+          "participant_count": 1,
+          "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-28-1622182410/25789895d52b/wheat.jpg",
+          "description": "Classification of wheat seeds into three classes based on seven dimensions of data",
+          "competition_type": "competition"
+      }
+  ],
+  "featured_comps": [
+      {
+          "id": 13,
+          "title": "Classify Wheat Seeds",
+          "created_by": "admin",
+          "created_when": "2021-05-28T06:13:30.525547Z",
+          "published": true,
+          "participant_count": 1,
+          "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-28-1622182410/25789895d52b/wheat.jpg",
+          "description": "Classification of wheat seeds into three classes based on seven dimensions of data",
+          "competition_type": "competition"
+      }
+  ]}
+}
