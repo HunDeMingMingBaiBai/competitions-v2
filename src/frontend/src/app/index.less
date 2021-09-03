@@ -4,3 +4,205 @@ body {
   margin: 0;
   padding: 0;
 }
+
+
+// Color variables (appears count calculates by raw css)
+@color0: #e2e2e2; // Appears 2 times
+@color1: #3f3f3f; // Appears 2 times
+
+// Width variables (appears count calculates by raw css)
+@width1: 100%; // Appears 2 times
+
+
+#bg {
+  background: rgba(19, 48, 70, 0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -1;
+}
+
+#jumbo_logo {
+  margin-top: 20px;
+  width: 35%;
+}
+
+#home-logo {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.right.item {
+  position: absolute !important;
+  right: 0;
+  top: 9px;
+}
+
+.left.item {
+  left: 0;
+  position: absolute !important;
+  top: 9px;
+}
+
+.ui.secondary.inverted.pointing.menu {
+  border: transparent;
+}
+
+.jumbotron {
+  padding: 0 0 2em 0 !important;
+
+  .subtitle {
+    color: rgba(183, 201, 214, 0.612);
+    font-size: 1rem;
+  }
+}
+
+.style_button {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: @color0;
+  font-weight: 100;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.65);
+    color: @color1;
+
+    .icon {
+      opacity: 1;
+    }
+  }
+}
+
+#user_dropdown {
+  color: rgba(255, 255, 255, 0.7) !important;
+
+  a {
+    border-radius: 0 !important;
+    width: @width1;
+  }
+}
+
+#competition_dropdown {
+  color: rgba(255, 255, 255, 0.7) !important;
+
+  a {
+    border-radius: 0 !important;
+    width: @width1;
+  }
+}
+
+.masthead {
+  position: relative;
+
+  .logo.item {
+    img {
+      margin-right: 1em;
+    }
+  }
+
+  .ui.menu {
+    margin: 0;
+
+    .ui.button {
+      margin-left: 0.5em;
+    }
+  }
+
+  .menu {
+    .toc.item {
+      display: none;
+    }
+  }
+
+  h1.ui.header {
+    font-size: 2em;
+    font-size: 4em;
+    font-weight: normal;
+    margin-bottom: 0;
+    margin-top: 1.5em;
+    margin-top: 3em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-size: 1.7em;
+    font-weight: normal;
+    margin-top: 0.5em;
+  }
+
+  h3 {
+    font-size: 2em;
+  }
+
+  .button+h3 {
+    margin-top: 3em;
+  }
+
+  p+h3 {
+    margin-top: 3em;
+  }
+
+  .floated.image {
+    clear: both;
+  }
+
+  p {
+    font-size: 1.33em;
+  }
+
+  .horizontal.divider {
+    margin: 3em 0;
+  }
+}
+
+.quote.stripe.segment {
+  padding: 0;
+
+  .grid {
+    .column {
+      padding-bottom: 5em;
+      padding-top: 5em;
+    }
+  }
+}
+
+#page_content {
+  margin-bottom: 50px;
+  min-height: 82vh;
+}
+
+#header {
+  background: transparent;
+  margin-bottom: 20px;
+
+  .ui.menu {
+    .ui.dropdown {
+      .menu>.item {
+        color: rgba(0, 0, 0, 0.6) !important;
+      }
+    }
+  }
+
+  .icon.user.outline {
+    margin-right: 0;
+  }
+}
+
+#toast-container {
+  margin-right: 0.5em;
+  margin-top: 3em;
+  opacity: 0.8;
+}
+
+.ui.text.container.style_button {
+  bottom: 0 !important;
+}
+
+.ui.thin.sidebar {
+  z-index: 3;
+}
+
+.footer.segment {
+  padding: 2em 0;
+}
