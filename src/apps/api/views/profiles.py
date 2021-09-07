@@ -26,6 +26,7 @@ from competitions.models import Submission
 from api.serializers.competitions import ServerStatusSerializer
 
 from django.contrib.auth import authenticate, login, logout
+from utils.render_response import success_data
 
 User = get_user_model()
 
@@ -41,6 +42,7 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
         return [permission() for permission in self.permission_classes]
 
     def update(self, request, *args, **kwargs):
+        print(request.user)
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data = request.data
@@ -86,8 +88,8 @@ def user_lookup(request):
             "username": user.username,
         }
 
-    return HttpResponse(
-        json.dumps({"results": [_get_data(u) for u in users]}),
+    return JsonResponse(
+        success_data({"results": [_get_data(u) for u in users]}),
     )
 
 
@@ -255,7 +257,7 @@ class OrganizationViewSet(mixins.CreateModelMixin,
 def get_token(request):
     from django.middleware.csrf import get_token
     token = get_token(request)
-    return JsonResponse(data={'token': token})
+    return JsonResponse(data=success_data({'token': token}))
 
 
 def signup_site(request):
@@ -268,7 +270,7 @@ def signup_site(request):
         user = authenticate(username=username, password=raw_password)
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         serializer = UserSerializer(user)
-        return JsonResponse(data={"code": "success", "user": serializer.data})
+        return JsonResponse(data=success_data({"user": serializer.data}))
     else:
         data = {
             "code": "fail",
@@ -285,7 +287,7 @@ def login_site(request):
     if user is not None:
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         serializer = UserSerializer(user)
-        return JsonResponse(data={"code": "success", "user": serializer.data})
+        return JsonResponse(data=success_data({"user": serializer.data}))
     else:
         return JsonResponse(data={"code": "fail"})
 
@@ -320,7 +322,7 @@ def get_general_status(request):
         {'label': "Competition Participants", 'count': competition_participants},
         {'label': "Submissions", 'count': submissions},
     ]
-    return JsonResponse(data={'general_stats': general_stats})
+    return JsonResponse(data=success_data({'general_stats': general_stats}))
 
 
 @api_view(['GET'])

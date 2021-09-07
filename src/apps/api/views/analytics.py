@@ -8,6 +8,7 @@ from rest_framework.filters import BaseFilterBackend
 from rest_framework_csv import renderers as r
 from competitions.models import Competition, Submission
 from api.serializers.analytics import AnalyticsSerializer
+from utils.render_response import success_data
 
 import datetime
 import coreapi
@@ -146,7 +147,7 @@ class AnalyticsView(APIView):
             serializer.is_valid(raise_exception=True)
             return Response(serializer.validated_data)
 
-        return Response({
+        return Response(data=success_data({
             'registered_user_count': User.objects.filter(date_joined__range=[start_date, end_date]).count(),
             'competition_count': Competition.objects.filter(created_when__range=[start_date, end_date]).count(),
             'competitions_published_count': Competition.objects.filter(published=True, created_when__range=[start_date, end_date]).count(),
@@ -157,4 +158,4 @@ class AnalyticsView(APIView):
             'start_date': start_date,
             'end_date': end_date,
             'time_unit': time_unit,
-        })
+        }))

@@ -459,3 +459,11 @@ DEFAULT_CREDENTIALS = pika.PlainCredentials(
                         username=RABBITMQ_DEFAULT_USER,
                         password=RABBITMQ_DEFAULT_PASS
                     )
+
+
+REST_FRAMEWORK = {
+    # 'EXCEPTION_HANDLER': 'utils.render_response.custom_exception_handler',
+    'DEFAULT_RENDERER_CLASSES': (
+        'utils.render_response.CustomJsonRenderer',
+    ),
+}
