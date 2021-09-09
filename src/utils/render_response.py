@@ -5,13 +5,13 @@ class CustomJsonRenderer(JSONRenderer):
         if renderer_context:
             if renderer_context['response'].status_code >= 400:
                 res = {
-                    'code': 'fail',
+                    'status': 'fail',
                     'fail_message': '服务器处理错误',
                     'error': data
                 }
             else:
                 res = {
-                    'code': 'success',
+                    'status': 'success',
                     'data': data
                 }
             return super().render(res, accepted_media_type, renderer_context)
@@ -20,7 +20,7 @@ class CustomJsonRenderer(JSONRenderer):
 
 def success_data(data=None):
     result = {
-        'code': 'success',
+        'status': 'success',
         'data': data
     }
     return result

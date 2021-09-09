@@ -273,8 +273,9 @@ def signup_site(request):
         return JsonResponse(data=success_data({"user": serializer.data}))
     else:
         data = {
-            "code": "fail",
-            "fail_message": form.error_messages
+            "status": "fail",
+            "fail_message": '',
+            "error": form.errors,
         }
         return JsonResponse(data=data)
 
@@ -289,12 +290,12 @@ def login_site(request):
         serializer = UserSerializer(user)
         return JsonResponse(data=success_data({"user": serializer.data}))
     else:
-        return JsonResponse(data={"code": "fail"})
+        return JsonResponse(data={"status": "fail"})
 
 
 def logout_site(request):
     logout(request)
-    return JsonResponse(data={"code": "success"})
+    return JsonResponse(data={"status": "success"})
 
 
 def get_general_status(request):
