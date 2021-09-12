@@ -19,7 +19,7 @@ const CodalabSearch = () => {
   const handleSearchChange = async (e, { value }) => {
     setLoading(true);
     try {
-      const { data } = await homeApi.competitions({ params: { search: value } });
+      const { data } = await homeApi.getCompetitions({ params: { search: value } });
       setResults(data);
     } catch (err) {
       console.log(err);

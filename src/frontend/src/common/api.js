@@ -6,17 +6,29 @@ import io from './utils/io';
 const HOME = 'home';
 
 io.create(HOME, {
-  competitionsFrontpage: {
+  getCompetitionsFrontpage: {
     method: 'get',
     url: '/api/competitions/front_page',
   },
-  generalStatus: {
+  getGeneralStatus: {
     method: 'get',
     url: '/api/get_general_status'
   },
-  competitions: {
+  getCompetitions: {
     method: 'get',
     url: '/api/competitions'
+  },
+  getPublicCompetitions: {
+    method: 'get',
+    url: '/api/competitions/public',
+    transformer: (config) => {
+      const { page } = config;
+      return {
+        params: {
+          page
+        }
+      }
+    }
   }
 });
 

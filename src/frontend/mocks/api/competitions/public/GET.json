@@ -1,0 +1,44 @@
+{
+  "status": "success",
+  "data": {
+      "next": "http://127.0.0.1:8000/api/competitions/public/?page=2&page_size=1",
+      "previous": null,
+      "count": 3,
+      "page_size": "2",
+      "results": [
+          {
+              "id": 6,
+              "title": "Competition 5",
+              "created_by": "marcus92-1",
+              "created_when": "2019-06-21T12:24:58Z",
+              "published": true,
+              "participant_count": 3,
+              "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-27-1622088307/dd081ed90f5e/example.jpg",
+              "description": "Measure middle size suddenly risk force join. Investment expert heavy sure affect. Middle boy guess while.",
+              "competition_type": "competition"
+          },
+          {
+            "id": 7,
+            "title": "Competition 5",
+            "created_by": "marcus92-1",
+            "created_when": "2019-06-21T12:24:58Z",
+            "published": true,
+            "participant_count": 3,
+            "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-27-1622088307/dd081ed90f5e/example.jpg",
+            "description": "Measure middle size suddenly risk force join. Investment expert heavy sure affect. Middle boy guess while.",
+            "competition_type": "competition"
+        },
+        {
+          "id": 8,
+          "title": "Competition 5",
+          "created_by": "marcus92-1",
+          "created_when": "2019-06-21T12:24:58Z",
+          "published": true,
+          "participant_count": 3,
+          "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-05-27-1622088307/dd081ed90f5e/example.jpg",
+          "description": "Measure middle size suddenly risk force join. Investment expert heavy sure affect. Middle boy guess while.",
+          "competition_type": "competition"
+      }
+      ]
+  }
+}

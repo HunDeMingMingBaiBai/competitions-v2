@@ -1,0 +1,106 @@
+// Color variables (appears count calculates by raw css)
+@color0: #e8e8e8; // Appears 2 times
+
+// Width variables (appears count calculates by raw css)
+@width3: 100%; // Appears 3 times
+
+
+#public-list {
+  width: @width3;
+  display: block;
+  margin-bottom: 5px;
+
+  .pagination-nav {
+    margin-bottom: 20px;
+    padding: 10px 0;
+    text-align: center;
+    width: @width3;
+  }
+
+  .pagination-nav.hide {
+    display: none;
+  }
+
+  .float-left {
+    float: left;
+  }
+
+  .float-right {
+    float: right;
+  }
+
+  .center {
+    margin: auto;
+  }
+
+  .link-no-deco {
+    text-decoration: none;
+  }
+
+  .tile-wrapper {
+    background-color: #ffffff;
+    border: solid 1px #dcdcdc;
+    color: #909090;
+    display: inline-flex;
+    margin-bottom: 6px;
+    min-width: 425px;
+    transition: all 75ms ease-in-out;
+    width: @width3;
+
+    &:hover {
+      background-color: @color0;
+      border: solid 1px #b9b9b9;
+      box-shadow: 0 3px 4px -1px #9c9c9c;
+      transition: all 75ms ease-in-out;
+
+      .comp-stats {
+        background-color: #344d5e;
+        transition: background-color 75ms ease-in-out;
+      }
+    }
+  }
+
+  .img-wrapper {
+    align-self: center;
+    padding: 5px;
+
+    img {
+      margin: 0 auto;
+      max-height: 60px !important;
+      max-width: 60px !important;
+    }
+  }
+
+  .comp-info {
+    width: calc(~"100% - 140px - 80px");
+
+    .heading {
+      color: #1b1b1b;
+      margin-bottom: 0;
+      padding: 5px;
+      text-align: left;
+    }
+
+    .comp-description {
+      font-size: 13px;
+      line-height: 1.15em;
+      margin: 0.35em;
+      text-align: left;
+    }
+  }
+
+  .comp-stats {
+    background: #405e73;
+    color: @color0;
+    font-size: 12px;
+    padding: 10px;
+    text-align: center;
+    width: 140px;
+  }
+
+  .organizer {
+    font-size: 13px;
+    margin: 0.35em;
+    text-align: left;
+  }
+}
