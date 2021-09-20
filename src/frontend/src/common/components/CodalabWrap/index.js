@@ -2,19 +2,32 @@
  * @description Codalab Page Common Wrap
  * @author liguanlin<liguanlin@4paradigm.com>
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dropdown, Icon } from 'semantic-ui-react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import CodalabSearch from '@/common/components/CodalabSearch';
 
 const CodalabWrap = (props) => {
-  const { showLogo = false } = props;
+  const [showLogo, setShowLogo] = useState(false);
   const history = useHistory();
+  const location = useLocation();
 
-  const handleManagementClicked = () => { };
+  useEffect(() => {
+    if (location.pathname) {
+      setShowLogo(true);
+    } else {
+      setShowLogo(false);
+    }
+  }, [location])
+
+  const handleManagementClicked = () => {
+    history.push({
+      pathname: '/competitions',
+    });
+  };
   const handlePublicClicked = () => {
     history.push({
-      pathname: '/public',
+      pathname: '/competitions/public',
     });
   };
   const handleMenuDropdownClick = (e, data) => {

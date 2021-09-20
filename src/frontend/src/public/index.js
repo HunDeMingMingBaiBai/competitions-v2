@@ -1,5 +1,5 @@
 /**
- * @description Public Competitions Page
+ * @description Benchmarks: Public Competitions List
  * @author liguanlin<liguanlin@4paradigm.com>
  */
 import React, { useEffect, useMemo, useState } from 'react';
@@ -67,10 +67,10 @@ const Public = () => {
   }, [currentPage, count]);
 
   const changePage = (page) => {
-    const params = qs.stringify({ ...defaultParams, page })
+    const params = getFilters();
     history.push({
       pathname: location.pathname,
-      search: params
+      search: qs.stringify(params)
     });
     setCurrentPage(page);
   }
@@ -89,17 +89,15 @@ const Public = () => {
   };
 
   return (
-    <CodalabWrap>
-      <div id="public-list">
-        <h1>Public Competitions</h1>
-        <div className={ `pagination-nav ` }>
-          <button onClick={ handleBackClicked } className={ `float-left ui inline button active ${isBackDisabled ? 'disabled' : ''}` }>Back</button>
-          { currentPage } of { Math.ceil(count / pageSize) }
-          <button onClick={ handleNextClicked } className={ `float-right ui inline button active ${isNextDisabled ? 'disabled' : ''}` }>Next</button>
-        </div>
-        { competitions.map((item) => (<Competition data={ item } />)) }
+    <div id="public-list">
+      <h1>Public Competitions</h1>
+      <div className={ `pagination-nav ` }>
+        <button onClick={ handleBackClicked } className={ `float-left ui inline button active ${isBackDisabled ? 'disabled' : ''}` }>Back</button>
+        { currentPage } of { Math.ceil(count / pageSize) }
+        <button onClick={ handleNextClicked } className={ `float-right ui inline button active ${isNextDisabled ? 'disabled' : ''}` }>Next</button>
       </div>
-    </CodalabWrap>
+      { competitions.map((item) => (<Competition data={ item } />)) }
+    </div>
   )
 };
 export default Public;

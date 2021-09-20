@@ -5,6 +5,7 @@
 import React, { PureComponent } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
+import CodalabWrap from '@/common/components/CodalabWrap';
 import Routes from './routes';
 
 import './index.less';
@@ -17,7 +18,9 @@ class App extends PureComponent {
     return (
       <HashRouter hashHistory={ history }>
         <div className='base-layout'>
-          <Routes />
+          <CodalabWrap>
+            <Routes />
+          </CodalabWrap>
         </div>
       </HashRouter>
     );
