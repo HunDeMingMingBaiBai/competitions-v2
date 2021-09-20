@@ -1,0 +1,72 @@
+[
+  {
+    "id": 9,
+    "title": "Competition 8",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2018-12-25T02:30:56Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506578/be868d358495/example.jpg",
+    "description": "Center several entire name per director push turn. Her sister tell part themselves himself identify. Learn bill former owner research finish identify.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 7,
+    "title": "Competition 6",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2019-03-09T19:40:44Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/d16e946da26b/example.jpg",
+    "description": "Writer note PM blue whom something authority. Recent these nothing offer information save store. Week project leave.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 6,
+    "title": "Competition 5",
+    "created_by": "samantha71-1",
+    "created_when": "2019-05-30T00:29:00Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/5bcea28534df/example.jpg",
+    "description": "Hundred work maybe maybe. Little star indicate nearly design keep like unit.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 4,
+    "title": "Competition 3",
+    "created_by": "samantha71-1",
+    "created_when": "2020-04-29T00:04:06Z",
+    "published": false,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506576/8fc866315204/example.jpg",
+    "description": "Attorney question speak sound building player use small. Hair say choice policy. Carry improve society yard scene.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 5,
+    "title": "Competition 4",
+    "created_by": "samantha71-1",
+    "created_when": "2021-03-12T19:16:17Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506576/8b12b731ec0d/example.jpg",
+    "description": "Answer situation whole nor color else special. Every why experience animal.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 8,
+    "title": "Competition 7",
+    "created_by": "ramseynatalie-2",
+    "created_when": "2021-03-18T09:46:59Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619506577/03ecaeeed707/example.jpg",
+    "description": "Despite public air house guy back.",
+    "competition_type": "competition"
+  },
+  {
+    "id": 12,
+    "title": "Classify Wheat Seeds",
+    "created_by": "admin",
+    "created_when": "2021-04-27T07:49:22.507727Z",
+    "published": true,
+    "logo": "https://tech-cola-public-1252788780.cos.ap-tokyo.myqcloud.com/logos/2021-04-27-1619509762/154a118c7b49/wheat.jpg",
+    "description": "Classification of wheat seeds into three classes based on seven dimensions of data",
+    "competition_type": "competition"
+  }
+]

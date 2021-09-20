@@ -6,6 +6,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router';
 import Home from '@/home';
 import Public from '@/public';
+import Management from '@/management';
 
 const Routes = () => (
   <Switch>
@@ -15,7 +16,12 @@ const Routes = () => (
       component={ Home }
     />
     <Route
-      path='/public'
+      path='/competitions'
+      component={ Management }
+      exact
+    />
+    <Route
+      path='/competitions/public'
       component={ Public }
     />
   </Switch>
